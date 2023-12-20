@@ -22,7 +22,7 @@ for i = 1: N
     stname{i,1} = dirlist(i).name;
 end
 
-for i = 3
+for i = 1:N
     clear hvsr95 dt dataE dataN dataZ tE tN tZ aE aN aZ 
     disp(i)
     folder = [dirlist(i).folder,'/',stname{i}];
