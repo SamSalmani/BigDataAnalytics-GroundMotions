@@ -1,4 +1,4 @@
-This code implements Konno-Ohmachi smoothing algorithm. It is faster than
-% its previous version ("konnoOhmachiSmooth") for arrays longer than ~1500.
-% This version can save as much as 40% of the time required for the 
-% old version.
+function figinit(x,y,fig)
+fig.PaperUnits = 'inches';
+fig.PaperPosition=[0 0 x y];
+fig.PaperSize=[x y];
