@@ -1,6 +1,6 @@
 clc;clear; close all;
 
-% parallel computing activation
+% parallel computing
 poolobj = gcp('nocreate');
 seedchange = 'No';
 nparpro=10;
@@ -11,11 +11,11 @@ elseif isempty(poolobj)
     parpool(nparpro);
 end
 
-d = dir('C:\Users\hsalmanitehrani\Desktop\Thesis\Networks\Free_fields\NC');
+% reading ground motion data
+d = dir(pwd);
 dirlist = d([d.isdir]);
 dirlist = dirlist(~ismember({dirlist.name}, {'.','..'}));
 N = size(dirlist,1);
-
 b = 40; g = 9.81;
 
 for i = 1: N
@@ -24,7 +24,7 @@ end
 
 for i = 3
     clear hvsr95 dt dataE dataN dataZ tE tN tZ aE aN aZ 
-%     disp(i)
+    disp(i)
     folder = [dirlist(i).folder,'/',stname{i}];
     d = dir(folder);
     folder_list = d([d.isdir]);
@@ -45,7 +45,7 @@ for i = 3
             fileE = dir([dir_to_search,'/*E.sac']);
             dataE = rdsac([fileE.folder,'/',fileE.name]);
         end
-        %dataE = rdsac([fileE.folder,'/',fileE.name]);
+        dataE = rdsac([fileE.folder,'/',fileE.name]);
        
         if exist ([dir_to_search,'/HHN.sac' ]) 
             fileN = dir([dir_to_search,'/HHN.sac']);
@@ -57,7 +57,7 @@ for i = 3
             fileN = dir([dir_to_search,'/*N.sac']);
             dataN = rdsac([fileN.folder,'/',fileN.name]);
         end
-        %dataN = rdsac([fileN.folder,'/',fileN.name]);
+        dataN = rdsac([fileN.folder,'/',fileN.name]);
         
         if exist ([dir_to_search,'/HNZ.sac' ]) 
             fileZ = dir([dir_to_search,'/HNZ.sac']);
@@ -69,7 +69,7 @@ for i = 3
                 fileZ = dir([dir_to_search,'/HN3.sac']);
                 dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
         end
-        %dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
+        dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
         
         
         station = [dataE.HEADER.STLA,dataE.HEADER.STLO];
@@ -84,7 +84,7 @@ for i = 3
     dt = min(min(dtlist));
 
     count = 0;
-    for j = 1%M
+    for j = 1:M
         
         dir_to_search = [folder,'/',folder_list(j).name];   
         if exist ([dir_to_search,'/HHE.sac' ])
@@ -109,7 +109,7 @@ for i = 3
             fileN = dir([dir_to_search,'/*N.sac']);
             dataN = rdsac([fileN.folder,'/',fileN.name]);
         end
-        %dataN = rdsac([fileN.folder,'/',fileN.name]);
+        dataN = rdsac([fileN.folder,'/',fileN.name]);
         
         if exist ([dir_to_search,'/HNZ.sac' ])
             fileZ = dir([dir_to_search,'/*Z.sac']);
@@ -121,7 +121,7 @@ for i = 3
             fileZ = dir([dir_to_search,'/HN3.sac']);
             dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
         end
-        %dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
+        dataZ = rdsac([fileZ.folder,'/',fileZ.name]);
         
         
         if exist('dataE', "var")
@@ -157,7 +157,7 @@ for i = 3
         [IN,iii] = unique(IN); tN = tN(iii);
         [IZ,iii] = unique(IZ); tZ = tZ(iii);
                 
-        %hhh = figure(11);clf;hold all; plot(tE,IE);plot(tN,IN);plot(tZ,IZ);drawnow; 
+        hhh = figure(1);clf;hold all; plot(tE,IE);plot(tN,IN);plot(tZ,IZ);drawnow; 
         lowerboundE = find(IE >= 0.05,1);
         upperboundE = find(IE <= 0.95); upperboundE=upperboundE(end);
         lowerboundN = find(IN >= 0.05,1);
@@ -196,65 +196,26 @@ for i = 3
             count = count+1; 
 
             hvsr95(:,count)  = 1/sqrt(2)*fasterKonnoOhmachi(abs(sqrt((h195(1:nfreq)+h295(1:nfreq)))./(v95(1:nfreq)+1e-6)),freq(1:nfreq),25);
-            %hvsr95(:,count)  = 1/sqrt(2)*(abs(sqrt((h195(1:nfreq)+h295(1:nfreq)))./(v95(1:nfreq)+1e-6)));
+            hvsr95(:,count)  = 1/sqrt(2)*(abs(sqrt((h195(1:nfreq)+h295(1:nfreq)))./(v95(1:nfreq)+1e-6)));
             
         end
     end
-%     hvsr_mean295 = exp(mean(log(hvsr95),2));
+    hvsr_mean295 = exp(mean(log(hvsr95),2));
     hvsr_mean295 = mean((hvsr95),2);
     hvsr_std295 = std((hvsr95),1,2);
 
 
-    %% PLOTTING
-%     mypath0 = [pwd,'/'];
-%     dir='Est'; mypath=[mypath0,dir]; mkdir(mypath);
-%     mkdir(fullfile(mypath0,dirlist(i).name));
-%     mypath2=[pwd,'/',dirlist(i).name];
+% PLOTTING
+     mypath0 = [pwd,'/'];
+     dir='Est'; mypath=[mypath0,dir]; mkdir(mypath);
+     mkdir(fullfile(mypath0,dirlist(i).name));
+     mypath2=[pwd,'/',dirlist(i).name];
 
-% % % %     h = figure(2);figinit(8,6,h);clf;
-% % % %     scatter(event(:,4),event(:,3))
-% % % %     ylabel('Magnitude'); xlabel('Distance'); ylim([3 5]); xlim([0 200]);
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_Mag_Dist.pdf']);
-% % % % 
-% % % %     h = figure(3); figinit(18,6, h); clf;
-% % % %     subplot(1,3,1);scatter(event(:,4),PGA(:,1)); ylim([5e-5 5e-2]); xlim([0 200]);xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"E-W"]);grid on;
-% % % %     subplot(1,3,2);scatter(event(:,4),PGA(:,2));ylim([5e-5 5e-2]); xlim([0 200]);xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"N-S"]); grid on;
-% % % %     subplot(1,3,3);scatter(event(:,4),PGA(:,3)); ylim([5e-5 5e-2]);xlim([0 200]);xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"Z"]); grid on;
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_PGA_Dist.pdf']);
-% % % % 
-% % % %     h = figure(33); figinit(18,6,h); clf;
-% % % %     subplot(1,3,1);scatter(event(:,4),PGA(:,1)); ylim([5e-5 0.01]); xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"E-W"]);grid on;
-% % % %     subplot(1,3,2);scatter(event(:,4),PGA(:,2));ylim([5e-5 0.01]); xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"N-S"]);grid on; 
-% % % %     subplot(1,3,3);scatter(event(:,4),PGA(:,3)); ylim([5e-5 0.01]);xlabel('Distance (km)'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"Z"]);grid on; 
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_PGA_Dist2.pdf']);
-% % % %     
-% % % %     h = figure(4); figinit(18,6,h); clf;
-% % % %     subplot(1,3,1);scatter(event(:,3),PGA(:,1)); ylim([5e-5 5e-2]); xlim([3 5]); xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"E-W"]);grid on;
-% % % %     subplot(1,3,2);scatter(event(:,3),PGA(:,2));ylim([5e-5 5e-2]);xlim([3 5]);  xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"N-S"]); grid on;
-% % % %     subplot(1,3,3);scatter(event(:,3),PGA(:,3)); ylim([5e-5 5e-2]);xlim([3 5]); xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"Z"]);grid on; 
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_PGA_Mag.pdf']);
-% % % % 
-% % % %     h = figure(44); figinit(18,6,h); clf; 
-% % % %     subplot(1,3,1);scatter(event(:,3),PGA(:,1)); ylim([5e-5 0.01]); xlim([3 5]); xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"E-W"]);grid on;
-% % % %     subplot(1,3,2);scatter(event(:,3),PGA(:,2));ylim([5e-5 0.01]);xlim([3 5]);  xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"N-S"]); grid on;
-% % % %     subplot(1,3,3);scatter(event(:,3),PGA(:,3)); ylim([5e-5 0.01]);xlim([3 5]); xlabel('Magnitude'); ylabel('PGA'); title([dataE.HEADER.KNETWK,dataE.HEADER.KSTNM,"Z"]); grid on;
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_PGA_Mag2.pdf']);
+     h = figure(2);figinit(8,6,h);clf;
+     scatter(event(:,4),event(:,3))
+     ylabel('Magnitude'); xlabel('Distance'); ylim([3 5]); xlim([0 200]);
+     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_Mag_Dist.pdf']);
 
-
-% % % %     h = figure(1);figinit(5,4,h);clf; hold all;
-% % % %     for ii = 1:count
-% % % %         h1 = plot(freq(1:nfreq),abs(hvsr95(:,ii)),'color',[0.8 0.8 0.8],'linewidth',0.5);
-% % % %     end
-% % % %    
-% % % %     h2 = plot(freq(1:nfreq),(hvsr_mean295(1:nfreq)),'r','linewidth',2);
-% % % %     h3 = plot(freq(1:nfreq),hvsr_mean295(1:nfreq)+hvsr_std295(1:nfreq),'r--','linewidth',2);
-% % % %     plot(freq(1:nfreq),hvsr_mean295(1:nfreq)-hvsr_std295(1:nfreq),'r--','linewidth',2);
-% % % %     xlim([0.1 100]);
-% % % %     ylim([0.0 10]);
-% % % %     xlabel('Frequency [Hz]'); ylabel('HVSR [-]')
-% % % %     set(gca,'xscale','log');
-% % % %     grid on; legend([h1,h2,h3],{'Empirical','Mean','Mean \pm std'});
-% % % %     print(h,'-dpdf',[dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_HVSR17.pdf']);
     csvwrite([dataE.HEADER.KNETWK,'_',dataE.HEADER.KSTNM,'_HVSR95_2power15_with_knno75_1.txt'],[freq(1:nfreq)' hvsr_mean295(1:nfreq,1) hvsr_std295(1:nfreq,1) hvsr95]);
-    %close all;
+    close all;
 end
